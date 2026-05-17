@@ -1,0 +1,59 @@
+# ========================
+# FAERS Pediatric ADR - .gitignore
+# ========================
+
+# ----- Raw FAERS Data Files (too large for GitHub) -----
+data/
+
+# ----- Python -----
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+*.egg
+dist/
+build/
+.eggs/
+*.so
+venv/
+env/
+.venv/
+
+# ----- Node / Frontend -----
+node_modules/
+frontend/dist/
+frontend/build/
+.npm
+.eslintcache
+
+# ----- Environment / Secrets -----
+.env
+*.env.local
+*.env.production
+
+# ----- Cache Files -----
+backend/reaction_cache_data/
+backend/report_cache_data/
+backend/gnn/
+
+# ----- IDE -----
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ----- OS Files -----
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ----- Test / Generated Files -----
+backend/test.pdf
+backend/test_6500.pdf
+backend/parsed_results.txt
+
+# ----- Misc -----
+*.log
+*.pid
+*.seed
