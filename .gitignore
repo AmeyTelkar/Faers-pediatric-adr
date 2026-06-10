@@ -57,3 +57,11 @@ backend/parsed_results.txt
 *.log
 *.pid
 *.seed
+
+# ----- Presentation & Q&A Files -----
+Data_Scalability_Answers.md
+Pipeline_Adaptability.md
+Presentation_Answers.md
+Presentation_DeepDive_Answers.md
+Presentation_ML_Explanation.md
+
