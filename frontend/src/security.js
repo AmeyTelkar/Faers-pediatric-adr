@@ -107,8 +107,62 @@ document.addEventListener('dragstart', (e) => {
   e.preventDefault();
 });
 
+// ═══════════════════════════════════════════════════════════════════
+// Layer 6: CSS Watermark Overlay (cannot be removed without source)
+// ═══════════════════════════════════════════════════════════════════
+(function injectWatermark() {
+  const style = document.createElement('style');
+  style.textContent = `
+    body::after {
+      content: "EDUCATIONAL USE ONLY — © 2026 PULSETECH (ANC-031) — NOT FOR REDISTRIBUTION";
+      position: fixed;
+      bottom: 8px;
+      right: 12px;
+      z-index: 99999;
+      pointer-events: none;
+      user-select: none;
+      font-size: 8px;
+      font-family: monospace;
+      color: rgba(255,255,255,0.06);
+      letter-spacing: 1px;
+      font-weight: 600;
+    }
+    /* Print protection: hide content when printing */
+    @media print {
+      body * { visibility: hidden !important; }
+      body::before {
+        visibility: visible !important;
+        content: "PRINTING DISABLED — PulseTech (ANC-031) — Educational Use Only";
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        font-family: monospace;
+        color: #000;
+        background: #fff;
+        z-index: 999999;
+      }
+    }
+  `;
+  document.head.appendChild(style);
+})();
+
+// ═══════════════════════════════════════════════════════════════════
+// Layer 7: Disable Copy/Paste of page content
+// ═══════════════════════════════════════════════════════════════════
+document.addEventListener('copy', (e) => {
+  // Allow copy in input/textarea
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  e.preventDefault();
+  if (e.clipboardData) {
+    e.clipboardData.setData('text/plain', '© 2026 PulseTech (ANC-031) — Content copying is disabled.');
+  }
+});
+
 export default {
   init() {
-    console.log('[PulseTech] Security shield active');
+    console.log('[PulseTech] Security shield active — Educational build');
   }
 };

@@ -29,6 +29,7 @@
     "postcss": "^8.4.38",
     "tailwindcss": "^3.4.3",
     "terser": "^5.46.2",
-    "vite": "^5.2.12"
+    "vite": "^5.2.12",
+    "vite-plugin-obfuscator": "^1.0.5"
   }
 }
