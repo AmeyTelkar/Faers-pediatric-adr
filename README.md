@@ -1,8 +1,17 @@
 # PulseTech FAERS Pediatric ADR Dashboard
 
+> [!IMPORTANT]
+> **⚖️ Copyright Notice & Intellectual Property Registration**  
+> * **Work Title:** PulseTech FAERS Pediatric ADR Dashboard  
+> * **Authors & Claimants:** Atherv Deepak Telkar & Amey Deepak Telkar  
+> * **Registration Class:** Computer Software / Literary Work (Under Copyright Registration Process, 2026)  
+> * **Filing Organization:** PulseTech Team (ANC-031)  
+> * **Rights Statement:** All rights reserved. Unauthorized copying, distribution, publishing, or reproduction of this source code, layout, or documentation in any form is strictly prohibited under international copyright laws.
+
 [![License: Research Use Only](https://img.shields.io/badge/License-Research_Use_Only-orange.svg)](#license)
 [![Team: PulseTech](https://img.shields.io/badge/Team-PulseTech%20(ANC--031)-blue.svg)](#team)
 [![Version: Phase 3](https://img.shields.io/badge/Release-Phase%203%20Production-green.svg)](#features)
+
 
 A **research-grade pharmacovigilance dashboard** for analyzing Adverse Drug Reactions (ADR) in the pediatric population using FDA FAERS data. By integrating a **13-step ETL pipeline**, standard **signal detection statistics**, and a **Heterogeneous Graph Attention Network (HANConv)**, this system identifies known and novel pediatric drug safety signals across specific developmental age bands.
 
