@@ -256,7 +256,9 @@ Heterogeneous graph neural networks have been proposed for large-scale pharmacov
 \hline
 \rowcolor{rowA} GH Safety Studies & Bell \etal~\cite{bell2010}, Stochholm \etal~\cite{stochholm2020} & Registry/FAERS descriptive & Disease-specific safety characterisation & No severity prediction; descriptive only & \xmark\ (Descriptive) \\
 \hline
-\rowcolor{rowB} Metabolic ML Framework & Telkar \etal~\cite{telkar2026obesity} & 15 core clinical columns & Adolescent-specific; leakage-aware; clinical imputation & Restricted to ages 12--17; obesity/diabetes only & \cmark\ (2-Stage Imputation) \\
+\rowcolor{rowB} Graph-Based Pharmacovigilance & Gao \etal~\cite{gao2025}, Shi \etal~\cite{shi2026} & Heterogeneous drug-patient-AE graphs & Captures relational structure between drugs, patients, and adverse events; global link prediction & Evaluated on adult populations only; not tested on pediatric endocrine sub-cohorts; high compute cost & \xmark\ (Requires complete labels) \\
+\hline
+\rowcolor{rowA} Pediatric FAERS Descriptive & Misu \etal~\cite{misu2023}, Chen \etal~\cite{chen2020thyroid} & Age-stratified FAERS cohorts; thyroid drug safety & Clinically focused; age-band characterisation; thyroid-specific signal detection & No ML classification; descriptive disproportionality only; no outcome imputation & \xmark\ (Descriptive) \\
 \hline
 \rowcolor{jpbiLight}
 \textbf{Proposed Framework} & \textbf{This Study} & \textbf{14 core clinical columns}* & \textbf{Full pediatric (0--17y); endocrine-specific; 87.28\% accuracy; clinical imputation resolving 73.56\% missingness} & \textbf{Cohort-specific tabular modeling; 7-class including CA} & \cmark\ (\textbf{2-Stage Imputation}) \\
