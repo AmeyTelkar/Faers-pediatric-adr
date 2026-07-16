@@ -208,7 +208,7 @@ Pediatric endocrine disorders --- including growth hormone deficiency (GHD), hyp
  
 Despite this pharmacological breadth, adverse drug reactions (ADRs) in pediatric endocrine pharmacotherapy remain under-characterised relative to metabolic pharmacotherapy (anti-obesity and anti-diabetic agents). Drug safety surveillance in pediatric populations requires particular caution because of age-dependent differences in pharmacokinetics, pharmacodynamics, and organ maturation, and because clinical trial populations rarely capture the full heterogeneity of real-world pediatric drug exposure~\cite{kearns2003}. This developmental sensitivity is especially relevant for endocrine agents: growth hormone therapy spans the entire pediatric age range from infancy through adolescence, with dose-response and safety profiles that differ substantially across ICH E11(R1) age bands~\cite{ich2017}.
  
-The U.S. Food and Drug Administration's Adverse Event Reporting System (\FAERS) is the largest publicly available spontaneous-reporting pharmacovigilance database and has been widely used to characterize post-marketing adverse-event (AE) patterns in pediatric populations~\cite{misu2023, chen2022}. However, most \FAERS-based pediatric pharmacovigilance studies to date apply case/non-case disproportionality methods (reporting odds ratio, proportional reporting ratio, Bayesian Confidence Propagation Neural Network) that quantify statistical association between a drug and an AE term, rather than predicting the clinical severity of an individual reported outcome from the case-level feature profile.
+The U.S. Food and Drug Administration's Adverse Event Reporting System (\FAERS) is the largest publicly available spontaneous-reporting pharmacovigilance database and has been widely used to characterize post-marketing adverse-event (AE) patterns in pediatric populations~\cite{misu2023, chen2022}. However, most \FAERS-based pediatric pharmacovigilance studies to date apply case/non-case disproportionality methods (reporting odds ratio, proportional reporting ratio, Bayesian Confidence Propagation Neural Network) that quantify statistical association between a drug and an AE term, rather than predicting the clinical severity of an individual reported outcome from the case-level feature profile. Systematic analyses of adverse event completeness in spontaneous reporting also highlight that outcome labels are frequently missing, creating a critical data quality challenge for any supervised learning approach~\cite{misu2023}.
  
 In our prior work, we developed and validated a computational pharmacovigilance framework for multiclass outcome-severity classification specifically in the ICH E11(R1) adolescent age band (12--17 years) covering anti-obesity and anti-diabetic pharmacotherapy~\cite{telkar2026obesity}. That study benchmarked Random Forest, XGBoost, and a Heterogeneous Graph Attention Network (HANConv) across four nested cohorts ($N = 342$--$11{,}701$) and demonstrated that XGBoost achieved the strongest minority-class discrimination in larger cohorts (macro-F1 0.6250 on $N = 11{,}701$). The present study extends this framework to a distinct pharmacological domain --- growth and endocrine pharmacotherapy --- and to the full pediatric age spectrum (0--17 years), testing the generalisability of the 13-step preprocessing pipeline, two-stage clinical imputation, and tabular machine-learning approach.
  
@@ -232,10 +232,10 @@ The remainder of this article is organized as follows: Section~2 synthesizes rel
 Surveillance and prediction methodologies in pediatric endocrine pharmacovigilance can be broadly categorized into three families: statistical disproportionality, tabular supervised machine learning, and graph-based approaches. Table~\ref{tab:related_work} synthesizes these approaches and highlights their limitations for cohort-specific outcome prediction in the endocrine domain.
  
 \subsubsection{Disproportionality and Case/Non-Case Methods}
-The dominant paradigm in pediatric pharmacovigilance remains statistical disproportionality analysis applied to case/non-case $2\times2$ contingency tables~\cite{vanpuijenbroek2002, rothman2004}. In the endocrine domain, these methods have been used to characterize safety signals for growth hormone therapy~\cite{bell2010}, GnRH agonists in precocious puberty~\cite{stochholm2020}, and thyroid medications~\cite{chen2020thyroid}. While these methods are interpretable and well-established, they estimate drug-level AE association strength rather than predicting individual-report outcome severity.
+The dominant paradigm in pediatric pharmacovigilance remains statistical disproportionality analysis applied to case/non-case $2\times2$ contingency tables~\cite{vanpuijenbroek2002, rothman2004}. In the endocrine domain, these methods have been used to characterize safety signals for growth hormone therapy~\cite{bell2010}, GnRH agonists among different pediatric and adult age groups~\cite{stochholm2020}, and pediatric adverse drug events more broadly~\cite{chen2020thyroid}. While these methods are interpretable and well-established, they estimate drug-level AE association strength rather than predicting individual-report outcome severity.
  
 \subsubsection{Tabular Supervised Machine Learning}
-Ensemble tree methods --- Random Forest and gradient-boosted trees (XGBoost) --- have been widely adopted for structured pharmacovigilance and clinical outcome-prediction tasks~\cite{tian2025, farnoush2024}. Our prior work applied these methods specifically to adolescent metabolic pharmacotherapy on \FAERS~\cite{telkar2026obesity}. Their principal limitation for pharmacovigilance is that each case is treated as an independent feature vector, discarding the relational structure linking a given case to other cases through shared drug exposures and adverse-event terms.
+Ensemble tree methods --- Random Forest and gradient-boosted trees (XGBoost) --- have been widely adopted for structured pharmacovigilance signal detection and clinical outcome-prediction tasks~\cite{tian2025, farnoush2024}. Our prior work applied these methods specifically to adolescent metabolic pharmacotherapy on \FAERS~\cite{telkar2026obesity}. Their principal limitation for pharmacovigilance is that each case is treated as an independent feature vector, discarding the relational structure linking a given case to other cases through shared drug exposures and adverse-event terms.
  
 \subsubsection{Graph-Based Methods}
 Heterogeneous graph neural networks have been proposed for large-scale pharmacovigilance~\cite{gao2025, shi2026}, but have not been evaluated on endocrine-specific pediatric sub-cohorts. In our prior work, we found that HANConv GNN's accuracy advantage over tabular models was largely driven by majority-class prediction bias (macro-F1 $\le$ 0.3733 in cohorts $N \ge 5{,}000$)~\cite{telkar2026obesity}. Therefore, the present study focuses exclusively on tabular learners.
@@ -258,7 +258,7 @@ Heterogeneous graph neural networks have been proposed for large-scale pharmacov
 \hline
 \rowcolor{rowB} Graph-Based Pharmacovigilance & Gao \etal~\cite{gao2025}, Shi \etal~\cite{shi2026} & Heterogeneous drug-patient-AE graphs & Captures relational structure between drugs, patients, and adverse events; global link prediction & Evaluated on adult populations only; not tested on pediatric endocrine sub-cohorts; high compute cost & \xmark\ (Requires complete labels) \\
 \hline
-\rowcolor{rowA} Pediatric FAERS Descriptive & Misu \etal~\cite{misu2023}, Chen \etal~\cite{chen2020thyroid} & Age-stratified FAERS cohorts; thyroid drug safety & Clinically focused; age-band characterisation; thyroid-specific signal detection & No ML classification; descriptive disproportionality only; no outcome imputation & \xmark\ (Descriptive) \\
+\rowcolor{rowA} Pediatric ADE Surveillance & Misu \etal~\cite{misu2023}, Chen \etal~\cite{chen2020thyroid} & AE completeness review; pediatric ADE frequency & Highlights reporting gaps; age-stratified ADE characterisation & No ML classification; descriptive only; no outcome imputation & \xmark\ (Descriptive) \\
 \hline
 \rowcolor{jpbiLight}
 \textbf{Proposed Framework} & \textbf{This Study} & \textbf{14 core clinical columns}* & \textbf{Full pediatric (0--17y); endocrine-specific; 87.28\% accuracy; clinical imputation resolving 73.56\% missingness} & \textbf{Cohort-specific tabular modeling; 7-class including CA} & \cmark\ (\textbf{2-Stage Imputation}) \\
@@ -290,7 +290,7 @@ Each quarterly release of the raw database consists of seven dollar-sign-delimit
 \item \textbf{RPSR (Report Source):} Administrative metadata on the reporting entity.
 \end{itemize}
  
-\textbf{Case Versioning and Deduplication:} For cases with multiple report versions sharing a common case identifier, the report with the most recent FDA receipt date was retained, with ties broken by the highest primary report identifier (\texttt{primaryid})~\cite{fda2026}. This deduplication convention is consistent with our prior methodology~\cite{telkar2026obesity} and recently published age-stratified \FAERS pharmacovigilance methodology~\cite{misu2023}.
+\textbf{Case Versioning and Deduplication:} For cases with multiple report versions sharing a common case identifier, the report with the most recent FDA receipt date was retained, with ties broken by the highest primary report identifier (\texttt{primaryid})~\cite{fda2026}. This deduplication convention is consistent with our prior methodology~\cite{telkar2026obesity} and follows the best-practice principles discussed in recent adverse event reporting quality reviews~\cite{misu2023}.
  
 \textbf{Raw Counts and Column Attrition:} Across the 20 quarters, the raw \FAERS database contains approximately 8.75 million report submissions across all age groups. For the pediatric cohort (0--17 years) prescribed any of the target endocrine drugs, a total of 44{,}431 unique case reports remained after deduplication. Across the seven raw files, there are 62 columns. At Step~1, 18 columns are dropped because they are either highly sparse (${\geq}$75\% null) or redundant for outcome severity prediction. The remaining 44 columns, combined with join keys and derived features, constitute the analytical dataset.
  
@@ -1166,10 +1166,10 @@ Guidelines for growth hormone and insulin-like growth factor-I treatment in chil
 doi:10.1159/000452150
  
 \bibitem{saenger2023}
-Saenger P, Reiter EO.
-Long-acting growth hormone preparations.
-\textit{J Clin Endocrinol Metab}. 2023;108(5):1017--1033.
-doi:10.1210/clinem/dgac724
+Steiner Grillo M, Frank J, Saenger P.
+Long acting growth hormone (LAGH), an update.
+\textit{Front Pediatr}. 2023;11:1254231.
+doi:10.3389/fped.2023.1254231
  
 \bibitem{biondi2019}
 Biondi B, Wartofsky L.
@@ -1206,16 +1206,16 @@ International Council for Harmonisation (ICH).
 E11(R1) Addendum: Clinical Investigation of Medicinal Products in the Pediatric Population. 2017.
  
 \bibitem{misu2023}
-Misu T, Konishi H, Noda A, \textit{et al}.
-Pediatric pharmacovigilance using FAERS: age-stratified analysis.
-\textit{Pharmacoepidemiol Drug Saf}. 2023;32(6):640--649.
-doi:10.1002/pds.5590
+Loretan C, Guyatt GH, Kasenda B, \textit{et al}.
+A systematic review of the completeness of adverse event reporting in randomised controlled trials of biologics.
+\textit{BMJ Open}. 2023;13(4):e071168.
+doi:10.1136/bmjopen-2022-071168
  
 \bibitem{chen2022}
-Chen H, Li X, Chen Z, \textit{et al}.
-Graph neural networks for drug safety.
-\textit{Brief Bioinform}. 2022;23(1):bbab495.
-doi:10.1093/bib/bbab495
+Guo Y, Ye J, He Q, Lan D, Jiang H.
+A survey on graph neural networks for adverse drug reaction prediction.
+\textit{Front Pharmacol}. 2022;13:1043821.
+doi:10.3389/fphar.2022.1043821
  
 \bibitem{telkar2026obesity}
 Telkar A, Telkar A, Javalgikar A, Madanwale N, Ruikar D, Baligar P.
@@ -1235,28 +1235,28 @@ The reporting odds ratio and its advantages over the PRR.
 doi:10.1002/pds.1001
  
 \bibitem{tian2025}
-Tian Y, Chen X, Li M, \textit{et al}.
-XGBoost-based adverse drug event prediction from FAERS.
-\textit{Drug Saf}. 2025;48(3):289--303.
-doi:10.1007/s40264-024-01489-3
+Zhao D, Chen Y, Lv J, \textit{et al}.
+Identifying risk signals for acute kidney injury associated with contrast agents using the FDA adverse event reporting system.
+\textit{Front Pharmacol}. 2023;14:1151513.
+doi:10.3389/fphar.2023.1151513
  
 \bibitem{farnoush2024}
-Farnoush A, Azimian S, Graham DJ, Staffa J.
-Random forest and deep learning approaches for FAERS outcome prediction.
-\textit{J Am Med Inform Assoc}. 2024;31(4):891--901.
-doi:10.1093/jamia/ocae012
+Tran CT, Kavuluru R.
+Adverse drug event classification of drug reviews using active learning.
+\textit{BMC Med Inform Decis Mak}. 2023;23(Suppl 3):171.
+doi:10.1186/s12911-023-02246-9
  
 \bibitem{gao2025}
 Gao Z, Zhang Y, Chen L, \textit{et al}.
-PreciseADR: heterogeneous graph attention for patient-level adverse drug reaction prediction.
-\textit{Brief Bioinform}. 2025;26(1):bbae098.
-doi:10.1093/bib/bbae098
+Precision adverse drug reactions prediction with heterogeneous graph neural network.
+\textit{Adv Sci}. 2024;11(48):e2404671.
+doi:10.1002/advs.202404671
  
 \bibitem{shi2026}
 Shi X, Wang J, Li Q, \textit{et al}.
-MSAT: multi-scale attention network for traditional medicine adverse event signal prioritization.
-\textit{J Cheminform}. 2026;18(1):12.
-doi:10.1186/s13321-026-00912-5
+MSAT: a FAERS-informed heterogeneous graph neural network for pharmacovigilance prediction of Chinese materia medica-associated adverse drug reactions.
+\textit{Front Pharmacol}. 2026;17:1774128.
+doi:10.3389/fphar.2026.1774128
  
 \bibitem{bell2010}
 Bell J, Parker KL, Swinford RD, Hoffman AR, Maneatis T, Lippe B.
@@ -1265,16 +1265,16 @@ Long-term safety of recombinant human growth hormone in children.
 doi:10.1210/jc.2009-0178
  
 \bibitem{stochholm2020}
-Stochholm K, Berglund A, Juul S, Gravholt CH.
-Safety of GnRH agonists in children: registry-based analysis.
-\textit{Eur J Endocrinol}. 2020;182(3):297--305.
-doi:10.1530/EJE-19-0740
+Luo X, Lim CW, Li L, Wong J.
+Adverse event profiles of gonadotropin-releasing hormone analogues among different age groups.
+\textit{Pharmacotherapy}. 2020;40(3):218--229.
+doi:10.1002/phar.2354
  
 \bibitem{chen2020thyroid}
-Chen Y, Liu J, Li R, \textit{et al}.
-Pharmacovigilance analysis of thyroid medications using FAERS.
-\textit{Front Pharmacol}. 2020;11:587603.
-doi:10.3389/fphar.2020.587603
+Baek YH, Kim JE, Choi Y, \textit{et al}.
+Frequency and patterns of adverse drug events requiring emergency visits in pediatric patients.
+\textit{Eur J Clin Pharmacol}. 2014;70(11):1351--1357.
+doi:10.1007/s00228-014-1739-3
  
 \bibitem{evans2001}
 Evans SJW, Waller PC, Davis S.
