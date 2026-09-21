@@ -10,141 +10,129 @@
 
 [![License: Research Use Only](https://img.shields.io/badge/License-Research_Use_Only-orange.svg)](#license)
 [![Team: PulseTech](https://img.shields.io/badge/Team-PulseTech%20(ANC--031)-blue.svg)](#team)
-[![Version: Phase 3](https://img.shields.io/badge/Release-Phase%203%20Production-green.svg)](#features)
+[![Python](https://img.shields.io/badge/Python-3.11-blue)](https://www.python.org/)
+[![React](https://img.shields.io/badge/React-18-61DAFB)](https://react.dev/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688)](https://fastapi.tiangolo.com/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791)](https://www.postgresql.org/)
 
-
-A **research-grade pharmacovigilance dashboard** for analyzing Adverse Drug Reactions (ADR) in the pediatric population using FDA FAERS data. By integrating a **13-step ETL pipeline**, standard **signal detection statistics**, and a **Heterogeneous Graph Attention Network (HANConv)**, this system identifies known and novel pediatric drug safety signals across specific developmental age bands.
+A **research-grade pharmacovigilance dashboard** for analyzing **Adverse Drug Reactions (ADRs) in the pediatric population** using FDA FAERS data (2021Q1–2025Q4). By integrating a **13-step ETL pipeline**, **4-metric disproportionality signal detection** (PRR, ROR, IC, EBGM), and a **Heterogeneous Graph Attention Network (HANConv)**, this system identifies known and novel pediatric drug safety signals across ICH E11(R1) developmental age bands.
 
 ---
 
 ## 👥 Authors & Team
-* **Team Name**: PulseTech (ANC-031)
-* **Authors**: **Atherv Deepak Telkar & Amey Deepak Telkar**
-* **Institution**: MIT Vishwaprayag University
+
+| Author | Institution | Role |
+|--------|-------------|------|
+| **Atherv Deepak Telkar** | MIT Vishwaprayag University | Co-Lead · Backend, ML/GNN, Data Pipeline |
+| **Amey Deepak Telkar** | MIT Vishwaprayag University | Co-Lead · Frontend, DevOps, Documentation |
+
+**Team Name:** PulseTech (ANC-031)  
+**Guides:** Prof. Darshan Ruikar, Prof. Preethi Baligar
+
+---
+
+## 📊 Key Results — Signal Detection (FAERS 2021Q1–2025Q4)
+
+| Metric | Value |
+|--------|-------|
+| Raw FAERS records processed | **7,612,804** |
+| Adolescent reports (12–17 yrs) | **403,278** |
+| Obesity-related drug panel | 11,701 reports (14 drugs) |
+| Diabetes-related drug panel | 5,208 reports (10 drugs) |
+| Drug-event pairs evaluated | **2,098** |
+| ROR signals (N≥3, 95% CI lower >1) | **360** |
+| Four-metric concordant signals | **105** |
+
+**Key pharmacovigilance signals discovered:**
+- **Metformin → Lactic Acidosis** (ROR = 61.22, 95% CI 25.21–148.68)
+- **Semaglutide → Optic Ischaemic Neuropathy** (ROR = 439.23) — 4-metric concordant
+- **Dapagliflozin → Cardiac Failure** (ROR = 40.24)
+- **Atorvastatin → Myalgia** (ROR = 16.89)
 
 ---
 
 ## 🏗️ System Architecture
 
-The dashboard is built on a distributed microservices architecture designed to handle large-scale demographic and clinical event datasets.
+The dashboard is built on a distributed microservices architecture designed to handle large-scale demographic and clinical event datasets. The 12-step numbered flow below shows the complete data journey from raw file upload to final PDF report generation.
 
-```mermaid
-graph TD
-    A[React 18 + Tailwind CSS Dashboard] <-->|REST API / JSON| B[FastAPI Backend]
-    B <-->|SQLAlchemy ORM| C[(PostgreSQL 16 Database)]
-    B <-->|Trigger Ingest & Training| D[Redis Message Broker]
-    D <-->|Distributed Tasks| E[Celery Worker Process]
-    E <-->|Local Cache & Query| F[RxNorm API]
-    E <-->|Load / Save Weights| G[PyTorch Geometric HANConv Models]
-    C <-->|Extract Data & Save Results| E
-```
+<p align="center">
+  <img src="docs/diagrams/High_Level_Architecture.png" alt="PulseTech High-Level System Architecture" width="100%">
+</p>
+
+### Architecture Flow (Numbered Steps)
+
+| Step | Component | Description |
+|:---:|-----------|-------------|
+| 1 | **User → React Dashboard** | Researcher uploads 7 raw FAERS ASCII `.txt` files or views existing data |
+| 2 | **React → FastAPI** | Frontend streams files to the backend via REST API |
+| 3 | **FastAPI → Redis** | Backend enqueues an ETL task ticket to the message broker |
+| 4 | **Redis → Celery** | Broker dispatches the task to background worker processes |
+| 5 | **Celery → PostgreSQL** | Worker executes the 13-step ETL pipeline and bulk-inserts clean data |
+| 6 | **React → FastAPI** | User requests analysis (signals, GNN training) with selected filters |
+| 7 | **FastAPI → Analytics Engine** | Backend triggers disproportionality computation (PRR, ROR, IC, EBGM) |
+| 8 | **FastAPI → ML/GNN Engine** | Backend triggers PyTorch HANConv model training |
+| 9 | **Analytics → PostgreSQL** | Computed signal scores are written back to the database |
+| 10 | **GNN → PostgreSQL** | Novel ADR predictions are stored in results tables |
+| 11 | **FastAPI → PostgreSQL** | Backend fetches final computed results for display |
+| 12 | **React → PDF Export** | Dashboard renders visualizations; jsPDF generates downloadable PDF |
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Layer | Technologies Used | Description |
+| Layer | Technologies | Description |
 |:---|:---|:---|
-| **Frontend** | React 18, Vite, TailwindCSS 3, Recharts, Lucide Icons | Responsive, dark-themed dashboard UI with dynamic visualizations. |
-| **Backend** | FastAPI (Python 3.11), SQLAlchemy, Alembic | Async REST API hosting database endpoints, background task triggers. |
-| **Database** | PostgreSQL 16 | Relational store for normalized DEMO, DRUG, REAC, OUTC, and INDI tables. |
-| **Task Queue** | Celery + Redis | Asynchronous ETL pipeline execution and model training to prevent API blocking. |
-| **ML & GNN** | PyTorch, PyTorch Geometric (PyG) | Heterogeneous Graph building, HANConv architecture, link prediction. |
-| **Pharmacovigilance** | PRR, ROR, IC (WHO-UMC), EBGM (DuMouchel GPS) | Statistical calculators with contingency tables for disproportionality. |
+| **Frontend** | React 18, Vite, TailwindCSS 3, Recharts, Cytoscape.js, Zustand, Lucide Icons | Responsive dashboard UI with interactive visualizations and graph network views |
+| **Backend** | FastAPI (Python 3.11), SQLAlchemy 2.0, Alembic, Uvicorn | Async REST API with ORM, migrations, and background task triggers |
+| **Database** | PostgreSQL 16, asyncpg, psycopg2 | Relational store for normalized DEMO, DRUG, REAC, OUTC, INDI, THER, RPSR tables |
+| **Task Queue** | Celery + Redis | Asynchronous ETL pipeline execution and model training |
+| **ML & GNN** | PyTorch, PyTorch Geometric (HANConv), XGBoost, scikit-learn, SHAP | Heterogeneous graph learning and gradient-boosted tree classifiers |
+| **Signal Detection** | PRR, ROR, IC (WHO-UMC), EBGM (DuMouchel GPS) | 4-metric disproportionality analysis via 2×2 contingency tables |
+| **Export** | jsPDF, html2canvas | Client-side PDF report generation with embedded charts |
+| **DevOps** | Docker, Docker Compose, Git/GitHub | Containerized deployment and version control |
 
 ---
 
 ## 🔄 The 13-Step Data Ingestion & Cleaning Pipeline
 
-Raw FDA FAERS data contains extensive duplicates, missing values, inconsistent units, and non-standard drug naming. The PulseTech ETL pipeline cleanses, normalizes, and filters raw inputs across 13 stages before committing entries to PostgreSQL.
+Raw FDA FAERS data contains extensive duplicates, missing values, inconsistent units, and non-standard drug naming. The PulseTech ETL pipeline cleanses, normalizes, and filters raw inputs across **3 phases and 13 stages** before committing entries to PostgreSQL.
 
-```mermaid
-flowchart TD
-    raw[Raw FAERS $.txt Files] --> S0[S0: Parse & Type Validation]
-    S0 --> S1[S1: Drop Null Columns]
-    S1 --> S2[S2: DEMO Deduplication]
-    S2 --> S3[S3: Age Normalization]
-    S3 --> S4[S4: ICH E11 Age Banding]
-    S4 --> S5[S5: Weight Normalization]
-    S5 --> S6[S6: Pediatric Filtering]
-    S6 --> S7[S7: Null-Safe Date Handler]
-    S7 --> S8[S8: Child Table Cascade Filter]
-    S8 --> S9[S9: Drug Removal & Role DN Cleaning]
-    S9 --> S10[S10: RxNorm Name Standardization]
-    S10 --> S11[S11: Severity Outcome Scoring]
-    S11 --> S12[S12: Indication Text Cleaning]
-    S12 --> S13[S13: Target Quarter Tagging]
-    S13 --> db[(Clean PostgreSQL DB)]
-```
+<p align="center">
+  <img src="docs/diagrams/ETL_Pipeline.png" alt="13-Step ETL Pipeline" width="60%">
+</p>
 
 ### 📋 Detailed Pipeline Stages
 
-| Step | Component / Module | Logic & Transformations Applied |
-|:---:|:---|:---|
-| **S0** | `validator.py` | Auto-detects file type (DEMO, DRUG, etc.) via header signatures. Validates delimiter integrity. |
-| **S1** | `validator.py` | Drops technical columns with >90% null counts database-wide (e.g., `auth_num`, `lit_ref`, `mfr_num`). |
-| **S2** | `deduplicator.py` | Deduplicates records using `caseid` + `MAX(caseversion)`. Tied records are broken using a 4-level fallback. |
-| **S3** | `age_normalizer.py` | Converts ages reported in diverse units (Days, Weeks, Months, Years, Decades, Hours) to a single decimal years format. |
-| **S4** | `age_normalizer.py` | Classifies patient into standard **ICH E11 age bands**: Neonate (<28d), Infant (28d-2y), Child (2y-12y), Adolescent (12y-18y). |
-| **S5** | `age_normalizer.py` | Normalizes weight fields to kilograms (converting lbs, oz, g, mg). |
-| **S6** | `pediatric_filter.py` | Drops rows where age is strictly $\ge 18$. Crucially retains reports where age is NULL to preserve signal count sensitivity. |
-| **S7** | `date_handler.py` | Parses partial dates (e.g., YYYYMM, YYYY) using first-of-month / first-of-year imputations safely. |
-| **S8** | `orchestrator.py` | Performs cascading join filters to clean child tables (DRUG, REAC, etc.) by removing rows belonging to discarded adult DEMO IDs. |
-| **S9** | `deduplicator.py` | Removes invalid/corrupted drugs (`val_vbm` = 2) and filters out `role_cod` = 'DN' (Definitively Not Suspect) drugs. |
-| **S10** | `drug_normalizer.py` | Cleans raw strings (removing dosages/forms), resolves synonyms via RxNorm API, and normalizes route variants. |
-| **S11** | `outcome_scorer.py` | Maps multi-outcome letters to numeric severity scores: Death (7), Life-threatening (6), Hospitalization (5), Congenital (4), Disability (3), Required Intervention (2), Other (1). |
-| **S12** | `orchestrator.py` | Cleans placeholder indication texts (e.g., 'UNKNOWN INDICATION') to database NULLs without discarding the primary row. |
-| **S13** | `orchestrator.py` | Tags every single row with the source quarter metadata (e.g., `2025Q1`) for cross-quarter stacking and tracking. |
+| Step | Phase | Component | Logic & Transformations |
+|:---:|:---:|:---|:---|
+| **S0** | 1 | `validator.py` | Auto-detects file type (DEMO, DRUG, etc.) via header signatures. Validates `$`-delimiter integrity |
+| **S1** | 1 | `validator.py` | Drops technical columns with >90% null counts (e.g., `auth_num`, `lit_ref`, `mfr_num`) |
+| **S2** | 1 | `deduplicator.py` | Deduplicates using `caseid` + `MAX(caseversion)`. Tied records broken via 4-level fallback |
+| **S3** | 1 | `age_normalizer.py` | Converts ages from Days, Weeks, Months, Years, Decades, Hours → single decimal years format |
+| **S4** | 1 | `age_normalizer.py` | Classifies patients into **ICH E11 age bands**: Neonate (<28d), Infant (28d–2y), Child (2–12y), Adolescent (12–18y) |
+| **S5** | 2 | `age_normalizer.py` | Normalizes weight fields to kilograms (converting lbs, oz, g, mg) |
+| **S6** | 2 | `pediatric_filter.py` | Drops rows where age ≥ 18. Retains NULL age reports to preserve signal sensitivity |
+| **S7** | 2 | `date_handler.py` | Parses partial dates (YYYYMM, YYYY) using first-of-month/year imputations |
+| **S8** | 2 | `orchestrator.py` | Cascading join filters on child tables (DRUG, REAC) removing adult DEMO IDs |
+| **S9** | 2 | `deduplicator.py` | Removes invalid drugs (`val_vbm` = 2) and filters out `role_cod` = 'DN' |
+| **S10** | 3 | `drug_normalizer.py` | Cleans raw strings, resolves synonyms via RxNorm API, normalizes route variants |
+| **S11** | 3 | `outcome_scorer.py` | Maps multi-outcome letters to severity scores: Death(7), Life-threatening(6), Hospitalization(5), Congenital(4), Disability(3), Required Intervention(2), Other(1) |
+| **S12** | 3 | `orchestrator.py` | Cleans placeholder indications (e.g., 'UNKNOWN INDICATION') to NULLs |
+| **S13** | 3 | `orchestrator.py` | **Quality Gate** — Tags rows with source quarter metadata (e.g., `2025Q1`) and validates data integrity before final DB commit |
 
 ---
 
-## 🏥 Understanding NULL vs. Unknown Ages
+## 🧠 ML & Analytics Component Architecture
 
-A key database constraint is preventing the loss of clinical reports that omit patient age. 
+The analytical backend consists of two parallel processing engines: a **Signal Detection Module** (statistical) and a **GNN Architecture** (deep learning), both reading from and writing results to PostgreSQL.
 
-* **NULL (Empty Field)**: Indicates that the age field in the original report was blank. 
-* **Unknown (Pipeline Flag)**: Set to `True` only if **both** the numeric age and the age group field (`age_grp`) are absent. If a report has no numeric age but indicates `age_grp = INF` (Infant), the pipeline estimates the age (e.g., 0.5 years) and maps it to the `INFANT` cohort.
-* **Clinical Defense**: Omitting unknown ages would delete over **85%** of the raw data. Keeping them allows us to maintain critical safety signal sensitivity while preventing background denominator inflation.
+<p align="center">
+  <img src="docs/diagrams/ML_Analytics_Components.png" alt="ML & Analytics Component Architecture" width="100%">
+</p>
 
----
+### Signal Detection Module
 
-## 🧠 GNN Model: Heterogeneous Graph Attention Network (HANConv)
-
-To predict hidden or underreported adverse drug events, we model FAERS as a heterogeneous graph and apply a **Heterogeneous Graph Attention Network (HANConv)**.
-
-```mermaid
-graph LR
-    subgraph Nodes [Node Types]
-        direction LR
-        P[Patient]
-        D[Drug]
-        R[Reaction]
-    end
-
-    subgraph Edges [Edge / Relation Types]
-        direction TB
-        P -->|takes_drug| D
-        P -->|experiences| R
-        D -->|associated_with| R
-        D -->|co_administered| D
-        R -->|co_occurs| R
-    end
-```
-
-### 🧬 Model Architecture & Ablation Study
-The system trains separate GNN models for each **ICH E11 age band** to capture developmental drug-response variances.
-* **Encoder**: Two-layer Heterogeneous Graph Attention Network (HANConv) with 4 attention heads in Layer 1 (dropout=0.3) and a single head in Layer 2.
-* **Decoder**: Dot-product link predictor computing edge probability between Drug and Reaction nodes.
-* **Ablation Study**: Compares GNN validation performance across 4 configurations:
-  1. **Full Config** (Cohort nodes + co-administration edges) - *Highest ROC-AUC*
-  2. **No Co-administration** (No co-admin edges)
-  3. **No Cohort** (Strictly single drug-reaction pairs)
-  4. **Minimal Network** (Sparse topology)
-
----
-
-## 📊 Disproportionality Signal Detection
-Disproportionality analysis measures whether a specific drug-reaction pairing occurs more frequently in a pediatric cohort than would be expected by chance. The dashboard computes 4 classic pharmacovigilance metrics using a $2 \times 2$ contingency table:
+The module operates on 2×2 contingency tables, running four pharmacovigilance metrics:
 
 $$\begin{array}{c|cc}
 & \text{Reaction of Interest} & \text{Other Reactions} \\
@@ -153,39 +141,61 @@ $$\begin{array}{c|cc}
 \text{Other Drugs} & c & d \\
 \end{array}$$
 
-* **PRR (Proportional Reporting Ratio)**: Measures the relative proportion of the reaction among reports for this drug compared to others.
-* **ROR (Reporting Odds Ratio)**: Calculates the odds of the reaction occurring in reports containing the target drug compared to reports without it.
-* **IC (Information Component)**: Logarithmic measure of disproportionality adapted from the WHO-UMC database.
-* **EBGM (Empirical Bayes Geometric Mean)**: Multi-item gamma-Poisson model providing shrinkage for low cell counts.
+| Metric | Description | Signal Threshold |
+|--------|-------------|-----------------|
+| **PRR** (Proportional Reporting Ratio) | Proportion of the reaction among reports for this drug vs. others | PRR ≥ 2, χ² ≥ 4, N ≥ 3 |
+| **ROR** (Reporting Odds Ratio) | Odds of the reaction with the target drug vs. without it | Lower 95% CI > 1 |
+| **IC** (Information Component) | Bayesian logarithmic measure from WHO-UMC methodology | IC₀₂₅ > 0 |
+| **EBGM** (Empirical Bayes Geometric Mean) | Multi-item gamma-Poisson shrinkage for low cell counts | EB05 ≥ 2 |
+
+### GNN Architecture — PediatricADRHAN
+
+| Layer | Description |
+|-------|-------------|
+| **Graph Builder** | Converts tabular DB data into heterogeneous graph (Drug, Patient, Reaction nodes; takes_drug, experiences, associated_with edges) |
+| **HANConv Layer 1** | 4-head Heterogeneous Graph Attention Network layer with dropout=0.3 |
+| **ELU Activation** | Exponential Linear Unit for non-linearity |
+| **HANConv Layer 2** | Single-head attention layer refining learned embeddings |
+| **Dot-Product Decoder** | Computes edge probability scores for novel drug-reaction link prediction |
 
 ---
 
 ## 🖥️ 7-Page Dashboard Features
 
-1. **Upload Hub**: Upload raw, multi-quarter FAERS files. Monitors real-time parsing progress with background worker status.
-2. **Demographics**: Interactive age-sex pyramids, weight distributions, and geographical maps of reporting reporters.
-3. **ADR Analysis**: Ranks top adverse reactions, drug frequencies, and severity scores across developmental age groups.
-4. **Signal Detection**: Filter and search PRR, ROR, IC, and EBGM metrics with custom threshold configurations.
-5. **GNN Network**: Visualizes predicted drug-reaction associations alongside model training loss curves.
-6. **Outcomes**: Breakdown of severity levels (Death, Hospitalization, etc.) by age bands.
-7. **Report Builder**: Generates structured summaries with dynamic graphs and lets you export a PDF report.
+| # | Page | Description |
+|---|------|-------------|
+| 1 | **Upload Hub** | Upload raw multi-quarter FAERS files. Real-time parsing progress with background worker status |
+| 2 | **Demographics** | Interactive age-sex pyramids, weight distributions, geographical reporter maps |
+| 3 | **ADR Analysis** | Top adverse reactions, drug frequencies, and severity scores across ICH E11 age groups |
+| 4 | **Signal Detection** | Filter and search PRR, ROR, IC, EBGM metrics with custom threshold configurations |
+| 5 | **GNN Network View** | Interactive Cytoscape.js graph visualization of predicted drug-reaction associations with training loss curves |
+| 6 | **Outcomes & Severity** | Breakdown of severity levels (Death, Hospitalization, etc.) by developmental age bands |
+| 7 | **Report Builder** | Generates structured summaries with dynamic graphs; exports as downloadable PDF |
+
+---
+
+## 🏥 Understanding NULL vs. Unknown Ages
+
+A key database constraint prevents the loss of clinical reports that omit patient age:
+
+* **NULL (Empty Field):** Age field in the original report was blank
+* **Unknown (Pipeline Flag):** Set to `True` only if **both** numeric age and `age_grp` are absent. If a report has `age_grp = INF` (Infant) but no numeric age, the pipeline estimates age (e.g., 0.5 years) and maps it to the `INFANT` cohort
+* **Clinical Defense:** Omitting unknown ages would delete over **85%** of raw data. Retaining them preserves critical safety signal sensitivity
 
 ---
 
 ## 🚀 Quick Start
 
 ### 1. Run via Docker Compose (Recommended)
-This starts all components (Database, Cache, Backend, Worker, Frontend) automatically:
 ```bash
 docker-compose up --build -d
 ```
 
 ### 2. Manual Startup (Windows / PowerShell)
 
-#### **Backend & Celery (Terminal 1 & 2)**
-Ensure python 3.11 is installed, then set up the environment:
+#### Backend & Celery (Terminal 1 & 2)
 ```powershell
-# In a fresh terminal, install dependencies
+# Install dependencies
 pip install -r backend/requirements.txt
 
 # Run Backend
@@ -195,12 +205,12 @@ cd backend
 uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 ```powershell
-# In a second terminal, start Celery
+# Start Celery Worker (separate terminal)
 cd backend
 celery -A celery_worker worker --loglevel=info
 ```
 
-#### **Frontend (Terminal 3)**
+#### Frontend (Terminal 3)
 ```powershell
 cd frontend
 npm install
@@ -208,9 +218,9 @@ npm run dev
 ```
 
 ### 3. Verification Addresses
-* **Dashboard Front-end**: [http://localhost:5173](http://localhost:5173)
-* **Interactive API Docs (Swagger)**: [http://localhost:8000/docs](http://localhost:8000/docs)
-* **API Health Check**: [http://localhost:8000/api/health](http://localhost:8000/api/health)
+* **Dashboard:** [http://localhost:5173](http://localhost:5173)
+* **API Docs (Swagger):** [http://localhost:8000/docs](http://localhost:8000/docs)
+* **Health Check:** [http://localhost:8000/api/health](http://localhost:8000/api/health)
 
 ---
 
@@ -218,25 +228,46 @@ npm run dev
 
 ```
 faers-pediatric-adr/
-├── backend/                  # FastAPI Application
+├── backend/                     # FastAPI Application
 │   ├── app/
-│   │   ├── pipeline/         # ETL Processing Engine
-│   │   ├── analytics/        # Disproportionality Metrics (PRR, ROR, EBGM, IC)
-│   │   ├── gnn/              # PyTorch Heter heterogeneous GNN (HANConv)
-│   │   └── routers/          # API Endpoints
-│   ├── alembic/              # DB Schema Versioning / Migrations
-│   └── celery_worker.py      # Background Task Entry Point
-├── frontend/                 # React 18 SPA
+│   │   ├── pipeline/            # 13-Step ETL Processing Engine
+│   │   ├── analytics/           # Disproportionality Metrics (PRR, ROR, IC, EBGM)
+│   │   ├── gnn/                 # PyTorch Geometric HANConv GNN
+│   │   ├── models/              # SQLAlchemy ORM Models
+│   │   ├── routers/             # API Endpoints (10 routers)
+│   │   ├── core/                # Core utilities
+│   │   ├── main.py              # FastAPI application entry point
+│   │   ├── database.py          # Database connection & session management
+│   │   └── security.py          # Authentication & authorization
+│   ├── alembic/                 # DB Schema Versioning / Migrations
+│   ├── celery_worker.py         # Background Task Entry Point
+│   ├── stored_proc.sql          # Signal detection stored procedures
+│   └── requirements.txt         # Python dependencies
+├── frontend/                    # React 18 SPA
 │   ├── src/
-│   │   ├── pages/            # 7 Dashboard Pages
-│   │   └── security.js       # Security Watermarks & Obfuscation Handles
-│   └── vite.config.js        # Obfuscating Bundler Setup
-├── docker-compose.yml        # Orchestration Config
-└── README.md                 # System Documentation (This File)
+│   │   ├── pages/               # 7 Dashboard Pages
+│   │   │   ├── UploadHub.jsx
+│   │   │   ├── Demographics.jsx
+│   │   │   ├── ADRAnalysis.jsx
+│   │   │   ├── SignalDetection.jsx
+│   │   │   ├── GNNNetworkView.jsx
+│   │   │   ├── OutcomesSeverity.jsx
+│   │   │   └── ReportBuilder.jsx
+│   │   ├── components/          # Reusable UI components
+│   │   ├── api/                 # Axios API integration layer
+│   │   ├── store/               # Zustand state management
+│   │   └── security.js          # Frontend security layer
+│   └── vite.config.js           # Vite build configuration
+├── docs/
+│   └── diagrams/                # Architecture & pipeline diagrams
+├── docker-compose.yml           # Multi-container orchestration
+├── Dockerfile                   # Container build instructions
+└── README.md                    # This file
 ```
 
 ---
 
 ## 📜 License
-Educational & Research Use Only — **PulseTech Team (ANC-031)**. 
+
+Educational & Research Use Only — **PulseTech Team (ANC-031)**.  
 All rights reserved © 2026.
