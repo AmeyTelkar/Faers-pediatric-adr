@@ -180,12 +180,15 @@ $$\begin{array}{c|cc}
 
 | # | Milestone | Description | Status |
 |---|-----------|-------------|--------|
-| M1 | **Data Pipeline & Database** | FAERS ingestion, 13-stage ETL pipeline, PostgreSQL schema design, multi-quarter architecture | ✅ Completed |
-| M2 | **Signal Detection Engine** | ROR, PRR, BCPNN IC, EBGM computation with PostgreSQL stored procedures | ✅ Completed |
-| M3 | **ML Model Training** | XGBoost, Random Forest, HANConv GNN training across 4 adolescent cohorts with leakage ablation | ✅ Completed |
-| M4 | **Dashboard Frontend** | 7-page React 18 dashboard with Recharts, Cytoscape.js graph visualization, PDF export | ✅ Completed |
-| M5 | **Research Paper & Reproducibility** | PLOS ONE manuscript (LaTeX), code reproducibility package, STROBE/READUS-PV checklists | ✅ Completed |
-| M6 | **Project Management, Testing & Final Polish** | Jira setup, unit tests, API docs, temporal validation, presentation | 🔄 In Progress |
+| M1 | **Problem Definition & Selection** | Identified research gap in pediatric pharmacovigilance; defined project scope targeting adolescent (12–17y) anti-obesity/anti-diabetic ADR analysis using FAERS; registered project title and synopsis | ✅ Completed |
+| M2 | **13-Stage Data Pipeline & Database** | Built complete FAERS data ingestion pipeline — parsing raw `.txt` files, deduplication per FDA guidance, age normalization, ICH E11 age banding, weight standardization, pediatric filtering, RxNorm drug normalization, MedDRA coding, severity scoring, quality gate; PostgreSQL schema with SQLAlchemy ORM & Alembic migrations | ✅ Completed |
+| M3 | **4-Metric Signal Detection Engine** | Implemented disproportionality analysis using 2×2 contingency tables — PRR, ROR, BCPNN IC (WHO-UMC), EBGM (DuMouchel GPS); PostgreSQL stored procedures; identified 360 ROR signals and 105 four-metric concordant signals across 2,098 drug-event pairs | ✅ Completed |
+| M4 | **ML & GNN Model Training** | Trained XGBoost & Random Forest for 6-class outcome severity prediction across 4 adolescent cohorts (Obesity All, Obesity Selected 4, Diabetes All, Diabetes Selected 4); trained HANConv heterogeneous graph attention network (PyTorch Geometric) for drug-ADR link prediction; conducted leakage-sensitivity ablation study | ✅ Completed |
+| M5 | **7-Page Dashboard Development** | Built full-stack React 18 + Vite + TailwindCSS dashboard — Upload Hub, Demographics, ADR Analysis, Signal Detection, GNN Network View (Cytoscape.js), Outcomes & Severity, Report Builder (PDF export via jsPDF); FastAPI backend with 10 API routers; Docker deployment | ✅ Completed |
+| M6 | **Reports & PDF Export** | Implemented automated report generation with dynamic charts, quadrant layouts, and one-click PDF export for regulatory-grade safety summaries | ✅ Completed |
+| M7 | **Architecture Diagrams & Figures** | Created High-Level System Architecture diagram (12-step flow), 13-Step ETL Pipeline flowchart (3-phase), ML & Analytics Component Architecture diagram (Signal Detection + GNN), DPA formula reference; system architecture documentation | ✅ Completed |
+| M8 | **Research Paper — GNN Dashboard Software** | Writing research paper for the GNN Dashboard software system; LaTeX manuscript documenting methodology, results, architecture, and reproducibility for journal submission | 🔄 In Progress |
+| M9 | **Project Management (Jira) & Final Polish** | Jira setup with Epics/Sprints, weekly task tracking, unit tests, API documentation, temporal validation, project presentation | 🔄 In Progress |
 
 ---
 
@@ -193,42 +196,42 @@ $$\begin{array}{c|cc}
 
 #### Atherv Deepak Telkar — Backend, ML & Data Pipeline
 
-| Task | Status |
-|------|--------|
-| FastAPI backend with 10 API routers (auth, demographics, GNN, outcomes, PDF export, reactions, reports, signals, upload, utils) | ✅ |
-| 13-stage FAERS data pipeline (deduplication, ICH E11 age stratification, RxNorm normalization, MedDRA coding) | ✅ |
-| 4-metric signal detection engine (ROR, PRR, BCPNN IC, EBGM) with PostgreSQL stored procedures | ✅ |
-| HANConv GNN training (PyTorch Geometric) for drug-ADR link prediction on obesity cohorts | ✅ |
-| XGBoost & Random Forest training for 6-class outcome severity across 4 cohorts + leakage ablation | ✅ |
-| PostgreSQL schema design with SQLAlchemy 2.0 ORM + Alembic migrations | ✅ |
-| Co-authored GNN Dashboard research paper (LaTeX) for PLOS ONE | ✅ |
+| Task | Milestone | Status |
+|------|-----------|--------|
+| 13-stage FAERS data pipeline (deduplication, ICH E11 age stratification, RxNorm normalization, MedDRA coding, severity scoring, quality gate) | M2 | ✅ |
+| 4-metric signal detection engine (ROR, PRR, BCPNN IC, EBGM) with PostgreSQL stored procedures | M3 | ✅ |
+| XGBoost & Random Forest training for 6-class outcome severity across 4 cohorts + leakage ablation | M4 | ✅ |
+| HANConv GNN training (PyTorch Geometric) for drug-ADR link prediction on obesity cohorts | M4 | ✅ |
+| FastAPI backend with 10 API routers (auth, demographics, GNN, outcomes, PDF export, reactions, reports, signals, upload, utils) | M5 | ✅ |
+| PostgreSQL schema design with SQLAlchemy 2.0 ORM + Alembic migrations | M2 | ✅ |
+| Co-authored GNN Dashboard research paper (LaTeX) — methodology & results sections | M8 | 🔄 |
 
 #### Amey Deepak Telkar — Frontend, DevOps & Documentation
 
-| Task | Status |
-|------|--------|
-| 7-page React 18 + Vite + TailwindCSS dashboard (Upload Hub, Demographics, ADR Analysis, Signal Detection, GNN Network, Outcomes, Report Builder) | ✅ |
-| GitHub private repo setup, 9 commits across full development lifecycle | ✅ |
-| PLOS ONE manuscript submission package (v16) + code reproducibility scripts | ✅ |
-| Docker + docker-compose configuration for full-stack deployment | ✅ |
-| Authentication system, frontend security layer, build protection | ✅ |
-| README documentation with architecture diagrams and key results | ✅ |
-| Reference verification — fixed 8 fabricated references with verified papers | ✅ |
+| Task | Milestone | Status |
+|------|-----------|--------|
+| Problem definition, project scope selection, synopsis registration | M1 | ✅ |
+| 7-page React 18 + Vite + TailwindCSS dashboard (Upload Hub, Demographics, ADR Analysis, Signal Detection, GNN Network, Outcomes, Report Builder) | M5 | ✅ |
+| Report Builder with automated PDF export (jsPDF + html2canvas) | M6 | ✅ |
+| Architecture diagrams — High-Level Architecture, ETL Pipeline, ML & Analytics Components | M7 | ✅ |
+| GitHub repo setup, Docker + docker-compose, authentication & security | M5 | ✅ |
+| README documentation with embedded architecture diagrams and key results | M7 | ✅ |
+| Co-authored GNN Dashboard research paper (LaTeX) — figures, references, abstract | M8 | 🔄 |
 
 ---
 
 ### Week 2 Planned Tasks (Sept 22–28, 2026)
 
-| Task | Assignee | Priority |
-|------|----------|----------|
-| Set up Jira project, add team members, create Epics & Sprints | Amey | 🔴 High |
-| Populate Jira board with Week 1 tasks (Done) + Week 2 sprint | Amey | 🔴 High |
-| Dashboard UI polish — responsive layouts, loading states, error boundaries | Amey | 🟡 Medium |
-| Temporal split validation (train 2021–2024, test 2025) for XGBoost | Atherv | 🟡 Medium |
-| Extend HANConv GNN training to Diabetes All & Diabetes Selected 4 cohorts | Atherv | 🟡 Medium |
-| Add Swagger/OpenAPI descriptions to all FastAPI endpoints | Atherv | 🟢 Low |
-| Add pytest test suite for signal detection and ML pipeline | Atherv | 🟡 Medium |
-| Prepare project demo presentation for class | Amey | 🔴 High |
+| Task | Milestone | Assignee | Priority |
+|------|-----------|----------|----------|
+| Continue GNN Dashboard research paper — results analysis, discussion, conclusion | M8 | Atherv + Amey | 🔴 High |
+| Set up Jira project, add team members, create Epics & Sprints | M9 | Amey | 🔴 High |
+| Populate Jira board with Week 1 tasks (Done) + Week 2 sprint | M9 | Amey | 🔴 High |
+| Temporal split validation (train 2021–2024, test 2025) for XGBoost | M4 | Atherv | 🟡 Medium |
+| Extend HANConv GNN training to Diabetes All & Diabetes Selected 4 cohorts | M4 | Atherv | 🟡 Medium |
+| Dashboard UI polish — responsive layouts, loading states, error boundaries | M5 | Amey | 🟡 Medium |
+| Add Swagger/OpenAPI descriptions to all FastAPI endpoints | M9 | Atherv | 🟢 Low |
+| Prepare project demo presentation for class | M9 | Amey | 🔴 High |
 
 ---
 
