@@ -15,7 +15,7 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688)](https://fastapi.tiangolo.com/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791)](https://www.postgresql.org/)
 
-A **research-grade pharmacovigilance dashboard** for analyzing **Adverse Drug Reactions (ADRs) in the pediatric population** using FDA FAERS data (2021Q1–2025Q4). By integrating a **13-step ETL pipeline**, **4-metric disproportionality signal detection** (PRR, ROR, IC, EBGM), and a **Heterogeneous Graph Attention Network (HANConv)**, this system identifies known and novel pediatric drug safety signals across ICH E11(R1) developmental age bands.
+A **research-grade pharmacovigilance dashboard** for analyzing **Adverse Drug Reactions (ADRs) in the pediatric population** using FDA FAERS data (2021Q1–2025Q4). By integrating a **13-step ETL pipeline**, **4-metric disproportionality signal detection** (PRR, ROR, IC, EBGM), and a **Heterogeneous Graph Attention Network (HANConv)**, this system identifies known and novel pediatric drug safety signals **across all drug classes** and ICH E11(R1) developmental age bands.
 
 ---
 
@@ -37,8 +37,7 @@ A **research-grade pharmacovigilance dashboard** for analyzing **Adverse Drug Re
 |--------|-------|
 | Raw FAERS records processed | **7,612,804** |
 | Adolescent reports (12–17 yrs) | **403,278** |
-| Obesity-related drug panel | 11,701 reports (14 drugs) |
-| Diabetes-related drug panel | 5,208 reports (10 drugs) |
+| Drug classes analyzed | All therapeutic classes (global scope) |
 | Drug-event pairs evaluated | **2,098** |
 | ROR signals (N≥3, 95% CI lower >1) | **360** |
 | Four-metric concordant signals | **105** |
@@ -180,10 +179,10 @@ $$\begin{array}{c|cc}
 
 | # | Milestone | Description | Status |
 |---|-----------|-------------|--------|
-| M1 | **Problem Definition & Selection** | Identified research gap in pediatric pharmacovigilance; defined project scope targeting adolescent (12–17y) anti-obesity/anti-diabetic ADR analysis using FAERS; registered project title and synopsis | ✅ Completed |
+| M1 | **Problem Definition & Selection** | Identified research gap in pediatric pharmacovigilance; defined project scope targeting pediatric (0–18y) ADR analysis across all drug classes using FAERS; registered project title and synopsis | ✅ Completed |
 | M2 | **13-Stage Data Pipeline & Database** | Built complete FAERS data ingestion pipeline — parsing raw `.txt` files, deduplication per FDA guidance, age normalization, ICH E11 age banding, weight standardization, pediatric filtering, RxNorm drug normalization, MedDRA coding, severity scoring, quality gate; PostgreSQL schema with SQLAlchemy ORM & Alembic migrations | ✅ Completed |
 | M3 | **4-Metric Signal Detection Engine** | Implemented disproportionality analysis using 2×2 contingency tables — PRR, ROR, BCPNN IC (WHO-UMC), EBGM (DuMouchel GPS); PostgreSQL stored procedures; identified 360 ROR signals and 105 four-metric concordant signals across 2,098 drug-event pairs | ✅ Completed |
-| M4 | **ML & GNN Model Training** | Trained XGBoost & Random Forest for 6-class outcome severity prediction across 4 adolescent cohorts (Obesity All, Obesity Selected 4, Diabetes All, Diabetes Selected 4); trained HANConv heterogeneous graph attention network (PyTorch Geometric) for drug-ADR link prediction; conducted leakage-sensitivity ablation study | ✅ Completed |
+| M4 | **ML & GNN Model Training** | Trained XGBoost & Random Forest for 6-class outcome severity prediction across pediatric cohorts (all ICH E11 age bands, all drug classes); trained HANConv heterogeneous graph attention network (PyTorch Geometric) for drug-ADR link prediction; conducted leakage-sensitivity ablation study | ✅ Completed |
 | M5 | **Full-Stack Dashboard Development** | Built full-stack React 18 + Vite + TailwindCSS dashboard with 7 interactive pages — Upload Hub, Demographics, ADR Analysis, Signal Detection, GNN Network View (Cytoscape.js), Outcomes & Severity, Report Builder (PDF export via jsPDF); FastAPI backend with 10 API routers; Docker deployment | ✅ Completed |
 | M6 | **Reports & PDF Export** | Implemented automated report generation with dynamic charts, quadrant layouts, and one-click PDF export for regulatory-grade safety summaries | ✅ Completed |
 | M7 | **Architecture Diagrams & Figures** | Created High-Level System Architecture diagram (12-step flow), 13-Step ETL Pipeline flowchart (3-phase), ML & Analytics Component Architecture diagram (Signal Detection + GNN), DPA formula reference; system architecture documentation | ✅ Completed |
@@ -201,7 +200,7 @@ $$\begin{array}{c|cc}
 | 13-stage FAERS data pipeline (deduplication, ICH E11 age stratification, RxNorm normalization, MedDRA coding, severity scoring, quality gate) | M2 | ✅ |
 | 4-metric signal detection engine (ROR, PRR, BCPNN IC, EBGM) with PostgreSQL stored procedures | M3 | ✅ |
 | XGBoost & Random Forest training for 6-class outcome severity across 4 cohorts + leakage ablation | M4 | ✅ |
-| HANConv GNN training (PyTorch Geometric) for drug-ADR link prediction on obesity cohorts | M4 | ✅ |
+| HANConv GNN training (PyTorch Geometric) for drug-ADR link prediction across all drug classes | M4 | ✅ |
 | FastAPI backend with 10 API routers (auth, demographics, GNN, outcomes, PDF export, reactions, reports, signals, upload, utils) | M5 | ✅ |
 | PostgreSQL schema design with SQLAlchemy 2.0 ORM + Alembic migrations | M2 | ✅ |
 | Co-authored GNN Dashboard research paper (LaTeX) — methodology & results sections | M8 | 🔄 |
