@@ -1,333 +1,142 @@
-# PulseTech FAERS Pediatric ADR Dashboard
+# PulseTech: Pediatric FAERS Pharmacovigilance Dashboard with Heterogeneous GNN Signal Exploration
 
-> [!IMPORTANT]
-> **⚖️ Copyright Notice & Intellectual Property Registration**  
-> * **Work Title:** PulseTech FAERS Pediatric ADR Dashboard  
-> * **Authors & Claimants:** Atherv Deepak Telkar & Amey Deepak Telkar  
-> * **Registration Class:** Computer Software / Literary Work (Under Copyright Registration Process, 2026)  
-> * **Filing Organization:** PulseTech Team (ANC-031)  
-> * **Rights Statement:** All rights reserved. Unauthorized copying, distribution, publishing, or reproduction of this source code, layout, or documentation in any form is strictly prohibited under international copyright laws.
+**Full Title:** PulseTech: Design and implementation of a human-in-the-loop web dashboard for pediatric FAERS pharmacovigilance with heterogeneous graph neural network signal exploration
 
-[![License: Research Use Only](https://img.shields.io/badge/License-Research_Use_Only-orange.svg)](#license)
-[![Team: PulseTech](https://img.shields.io/badge/Team-PulseTech%20(ANC--031)-blue.svg)](#team)
-[![Python](https://img.shields.io/badge/Python-3.11-blue)](https://www.python.org/)
-[![React](https://img.shields.io/badge/React-18-61DAFB)](https://react.dev/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688)](https://fastapi.tiangolo.com/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791)](https://www.postgresql.org/)
+**Authors:** Telkar A, Telkar A, Javalgikar A, Ruikar D, Madanwale N.
 
-A **research-grade pharmacovigilance dashboard** for analyzing **Adverse Drug Reactions (ADRs) in the pediatric population** using FDA FAERS data (2021Q1–2025Q4). By integrating a **13-step ETL pipeline**, **4-metric disproportionality signal detection** (PRR, ROR, IC, EBGM), and a **Heterogeneous Graph Attention Network (HANConv)**, this system identifies known and novel pediatric drug safety signals **across all drug classes** and ICH E11(R1) developmental age bands.
+**Journal:** PLOS ONE (submitted)
+
+<!-- After the first GitHub release is archived by Zenodo, replace every ZENODO_CONCEPT_DOI in this file (badge line and Citation section) with the concept DOI, e.g. 10.5281/zenodo.1234567 -->
+[![DOI](https://zenodo.org/badge/DOI/ZENODO_CONCEPT_DOI.svg)](https://doi.org/ZENODO_CONCEPT_DOI)
 
 ---
 
-## 👥 Authors & Team
+## Overview
 
-| Author | Institution | Role |
-|--------|-------------|------|
-| **Atherv Deepak Telkar** | MIT Vishwaprayag University | Co-Lead · Backend, ML/GNN, Data Pipeline |
-| **Amey Deepak Telkar** | MIT Vishwaprayag University | Co-Lead · Frontend, DevOps, Documentation |
+This repository contains the code, derived datasets, supplementary information and figures for PulseTech, a web-based pharmacovigilance dashboard for pediatric reports in the FDA Adverse Event Reporting System (FAERS), 2021Q1–2025Q4. PulseTech combines a 13-step ingestion pipeline with a mandatory human quality gate, in-dashboard four-metric disproportionality analysis (PRR, ROR, IC/BCPNN, EBGM) across ICH E11(R1) pediatric age bands, and an interactive heterogeneous graph attention network (HANConv) view for exploring drug–adverse drug reaction (ADR) relationships.
 
-**Team Name:** PulseTech (ANC-031)  
-**Guides:** Prof. Darshan Ruikar, Prof. Preethi Baligar
+Disproportionality signals are hypothesis-generating reporting associations, not causal findings.
 
 ---
 
-## 📊 Key Results — Signal Detection (FAERS 2021Q1–2025Q4)
-
-| Metric | Value |
-|--------|-------|
-| Raw FAERS records processed | **7,612,804** |
-| Adolescent reports (12–17 yrs) | **403,278** |
-| Drug classes analyzed | All therapeutic classes (global scope) |
-| Drug-event pairs evaluated | **2,098** |
-| ROR signals (N≥3, 95% CI lower >1) | **360** |
-| Four-metric concordant signals | **105** |
-
-**Key pharmacovigilance signals discovered:**
-- **Metformin → Lactic Acidosis** (ROR = 61.22, 95% CI 25.21–148.68)
-- **Semaglutide → Optic Ischaemic Neuropathy** (ROR = 439.23) — 4-metric concordant
-- **Dapagliflozin → Cardiac Failure** (ROR = 40.24)
-- **Atorvastatin → Myalgia** (ROR = 16.89)
-
----
-
-## 🏗️ System Architecture
-
-The dashboard is built on a distributed microservices architecture designed to handle large-scale demographic and clinical event datasets. The 12-step numbered flow below shows the complete data journey from raw file upload to final PDF report generation.
-
-<p align="center">
-  <img src="docs/diagrams/High_Level_Architecture.png" alt="PulseTech High-Level System Architecture" width="100%">
-</p>
-
-### Architecture Flow (Numbered Steps)
-
-| Step | Component | Description |
-|:---:|-----------|-------------|
-| 1 | **User → React Dashboard** | Researcher uploads 7 raw FAERS ASCII `.txt` files or views existing data |
-| 2 | **React → FastAPI** | Frontend streams files to the backend via REST API |
-| 3 | **FastAPI → Redis** | Backend enqueues an ETL task ticket to the message broker |
-| 4 | **Redis → Celery** | Broker dispatches the task to background worker processes |
-| 5 | **Celery → PostgreSQL** | Worker executes the 13-step ETL pipeline and bulk-inserts clean data |
-| 6 | **React → FastAPI** | User requests analysis (signals, GNN training) with selected filters |
-| 7 | **FastAPI → Analytics Engine** | Backend triggers disproportionality computation (PRR, ROR, IC, EBGM) |
-| 8 | **FastAPI → ML/GNN Engine** | Backend triggers PyTorch HANConv model training |
-| 9 | **Analytics → PostgreSQL** | Computed signal scores are written back to the database |
-| 10 | **GNN → PostgreSQL** | Novel ADR predictions are stored in results tables |
-| 11 | **FastAPI → PostgreSQL** | Backend fetches final computed results for display |
-| 12 | **React → PDF Export** | Dashboard renders visualizations; jsPDF generates downloadable PDF |
-
----
-
-## 🛠️ Tech Stack
-
-| Layer | Technologies | Description |
-|:---|:---|:---|
-| **Frontend** | React 18, Vite, TailwindCSS 3, Recharts, Cytoscape.js, Zustand, Lucide Icons | Responsive dashboard UI with interactive visualizations and graph network views |
-| **Backend** | FastAPI (Python 3.11), SQLAlchemy 2.0, Alembic, Uvicorn | Async REST API with ORM, migrations, and background task triggers |
-| **Database** | PostgreSQL 16, asyncpg, psycopg2 | Relational store for normalized DEMO, DRUG, REAC, OUTC, INDI, THER, RPSR tables |
-| **Task Queue** | Celery + Redis | Asynchronous ETL pipeline execution and model training |
-| **ML & GNN** | PyTorch, PyTorch Geometric (HANConv), XGBoost, scikit-learn, SHAP | Heterogeneous graph learning and gradient-boosted tree classifiers |
-| **Signal Detection** | PRR, ROR, IC (WHO-UMC), EBGM (DuMouchel GPS) | 4-metric disproportionality analysis via 2×2 contingency tables |
-| **Export** | jsPDF, html2canvas | Client-side PDF report generation with embedded charts |
-| **DevOps** | Docker, Docker Compose, Git/GitHub | Containerized deployment and version control |
-
----
-
-## 🔄 The 13-Step Data Ingestion & Cleaning Pipeline
-
-Raw FDA FAERS data contains extensive duplicates, missing values, inconsistent units, and non-standard drug naming. The PulseTech ETL pipeline cleanses, normalizes, and filters raw inputs across **3 phases and 13 stages** before committing entries to PostgreSQL.
-
-<p align="center">
-  <img src="docs/diagrams/ETL_Pipeline.png" alt="13-Step ETL Pipeline" width="60%">
-</p>
-
-### 📋 Detailed Pipeline Stages
-
-| Step | Phase | Component | Logic & Transformations |
-|:---:|:---:|:---|:---|
-| **S0** | 1 | `validator.py` | Auto-detects file type (DEMO, DRUG, etc.) via header signatures. Validates `$`-delimiter integrity |
-| **S1** | 1 | `validator.py` | Drops technical columns with >90% null counts (e.g., `auth_num`, `lit_ref`, `mfr_num`) |
-| **S2** | 1 | `deduplicator.py` | Deduplicates using `caseid` + `MAX(caseversion)`. Tied records broken via 4-level fallback |
-| **S3** | 1 | `age_normalizer.py` | Converts ages from Days, Weeks, Months, Years, Decades, Hours → single decimal years format |
-| **S4** | 1 | `age_normalizer.py` | Classifies patients into **ICH E11 age bands**: Neonate (<28d), Infant (28d–2y), Child (2–12y), Adolescent (12–18y) |
-| **S5** | 2 | `age_normalizer.py` | Normalizes weight fields to kilograms (converting lbs, oz, g, mg) |
-| **S6** | 2 | `pediatric_filter.py` | Drops rows where age ≥ 18. Retains NULL age reports to preserve signal sensitivity |
-| **S7** | 2 | `date_handler.py` | Parses partial dates (YYYYMM, YYYY) using first-of-month/year imputations |
-| **S8** | 2 | `orchestrator.py` | Cascading join filters on child tables (DRUG, REAC) removing adult DEMO IDs |
-| **S9** | 2 | `deduplicator.py` | Removes invalid drugs (`val_vbm` = 2) and filters out `role_cod` = 'DN' |
-| **S10** | 3 | `drug_normalizer.py` | Cleans raw strings, resolves synonyms via RxNorm API, normalizes route variants |
-| **S11** | 3 | `outcome_scorer.py` | Maps multi-outcome letters to severity scores: Death(7), Life-threatening(6), Hospitalization(5), Congenital(4), Disability(3), Required Intervention(2), Other(1) |
-| **S12** | 3 | `orchestrator.py` | Cleans placeholder indications (e.g., 'UNKNOWN INDICATION') to NULLs |
-| **S13** | 3 | `orchestrator.py` | **Quality Gate** — Tags rows with source quarter metadata (e.g., `2025Q1`) and validates data integrity before final DB commit |
-
----
-
-## 🧠 ML & Analytics Component Architecture
-
-The analytical backend consists of two parallel processing engines: a **Signal Detection Module** (statistical) and a **GNN Architecture** (deep learning), both reading from and writing results to PostgreSQL.
-
-<p align="center">
-  <img src="docs/diagrams/ML_Analytics_Components.png" alt="ML & Analytics Component Architecture" width="100%">
-</p>
-
-### Signal Detection Module
-
-The module operates on 2×2 contingency tables, running four pharmacovigilance metrics:
-
-$$\begin{array}{c|cc}
-& \text{Reaction of Interest} & \text{Other Reactions} \\
-\hline
-\text{Drug of Interest} & a & b \\
-\text{Other Drugs} & c & d \\
-\end{array}$$
-
-| Metric | Description | Signal Threshold |
-|--------|-------------|-----------------|
-| **PRR** (Proportional Reporting Ratio) | Proportion of the reaction among reports for this drug vs. others | PRR ≥ 2, χ² ≥ 4, N ≥ 3 |
-| **ROR** (Reporting Odds Ratio) | Odds of the reaction with the target drug vs. without it | Lower 95% CI > 1 |
-| **IC** (Information Component) | Bayesian logarithmic measure from WHO-UMC methodology | IC₀₂₅ > 0 |
-| **EBGM** (Empirical Bayes Geometric Mean) | Multi-item gamma-Poisson shrinkage for low cell counts | EB05 ≥ 2 |
-
-### GNN Architecture — PediatricADRHAN
-
-| Layer | Description |
-|-------|-------------|
-| **Graph Builder** | Converts tabular DB data into heterogeneous graph (Drug, Patient, Reaction nodes; takes_drug, experiences, associated_with edges) |
-| **HANConv Layer 1** | 4-head Heterogeneous Graph Attention Network layer with dropout=0.3 |
-| **ELU Activation** | Exponential Linear Unit for non-linearity |
-| **HANConv Layer 2** | Single-head attention layer refining learned embeddings |
-| **Dot-Product Decoder** | Computes edge probability scores for novel drug-reaction link prediction |
-
----
-
-## 🖥️ 7-Page Dashboard Features
-
-| # | Page | Description |
-|---|------|-------------|
-| 1 | **Upload Hub** | Upload raw multi-quarter FAERS files. Real-time parsing progress with background worker status |
-| 2 | **Demographics** | Interactive age-sex pyramids, weight distributions, geographical reporter maps |
-| 3 | **ADR Analysis** | Top adverse reactions, drug frequencies, and severity scores across ICH E11 age groups |
-| 4 | **Signal Detection** | Filter and search PRR, ROR, IC, EBGM metrics with custom threshold configurations |
-| 5 | **GNN Network View** | Interactive Cytoscape.js graph visualization of predicted drug-reaction associations with training loss curves |
-| 6 | **Outcomes & Severity** | Breakdown of severity levels (Death, Hospitalization, etc.) by developmental age bands |
-| 7 | **Report Builder** | Generates structured summaries with dynamic graphs; exports as downloadable PDF |
-
----
-
-## 🎯 Project Milestones & Weekly Progress
-
-### Milestones
-
-| # | Milestone | Description | Status |
-|---|-----------|-------------|--------|
-| M1 | **Problem Definition & Selection** | Identified research gap in pediatric pharmacovigilance; defined project scope targeting pediatric (0–18y) ADR analysis across all drug classes using FAERS; registered project title and synopsis | ✅ Completed |
-| M2 | **13-Stage Data Pipeline & Database** | Built complete FAERS data ingestion pipeline — parsing raw `.txt` files, deduplication per FDA guidance, age normalization, ICH E11 age banding, weight standardization, pediatric filtering, RxNorm drug normalization, MedDRA coding, severity scoring, quality gate; PostgreSQL schema with SQLAlchemy ORM & Alembic migrations | ✅ Completed |
-| M3 | **4-Metric Signal Detection Engine** | Implemented disproportionality analysis using 2×2 contingency tables — PRR, ROR, BCPNN IC (WHO-UMC), EBGM (DuMouchel GPS); PostgreSQL stored procedures; identified 360 ROR signals and 105 four-metric concordant signals across 2,098 drug-event pairs | ✅ Completed |
-| M4 | **ML & GNN Model Training** | Trained XGBoost & Random Forest for 6-class outcome severity prediction across pediatric cohorts (all ICH E11 age bands, all drug classes); trained HANConv heterogeneous graph attention network (PyTorch Geometric) for drug-ADR link prediction; conducted leakage-sensitivity ablation study | ✅ Completed |
-| M5 | **Full-Stack Dashboard Development** | Built full-stack React 18 + Vite + TailwindCSS dashboard with 7 interactive pages — Upload Hub, Demographics, ADR Analysis, Signal Detection, GNN Network View (Cytoscape.js), Outcomes & Severity, Report Builder (PDF export via jsPDF); FastAPI backend with 10 API routers; Docker deployment | ✅ Completed |
-| M6 | **Reports & PDF Export** | Implemented automated report generation with dynamic charts, quadrant layouts, and one-click PDF export for regulatory-grade safety summaries | ✅ Completed |
-| M7 | **Architecture Diagrams & Figures** | Created High-Level System Architecture diagram (12-step flow), 13-Step ETL Pipeline flowchart (3-phase), ML & Analytics Component Architecture diagram (Signal Detection + GNN), DPA formula reference; system architecture documentation | ✅ Completed |
-| M8 | **Research Paper — GNN-Powered Pharmacovigilance Dashboard** | Writing full-length research paper (20–25 pages, targeting Q1 journal) for the GNN-powered pharmacovigilance dashboard software covering global drug-ADR analysis (all drug classes, all pediatric age bands); LaTeX manuscript documenting system architecture, 13-stage pipeline, HANConv GNN methodology, signal detection framework, and reproducibility | 🔄 In Progress |
-| M9 | **Project Management (Jira) & Final Polish** | Jira setup with Epics/Sprints, weekly task tracking, unit tests, API documentation, temporal validation, project presentation | 🔄 In Progress |
-
----
-
-### Week 1 Progress (Sept 15–21, 2026)
-
-#### Atherv Deepak Telkar — Backend, ML & Data Pipeline
-
-| Task | Milestone | Status |
-|------|-----------|--------|
-| 13-stage FAERS data pipeline (deduplication, ICH E11 age stratification, RxNorm normalization, MedDRA coding, severity scoring, quality gate) | M2 | ✅ |
-| 4-metric signal detection engine (ROR, PRR, BCPNN IC, EBGM) with PostgreSQL stored procedures | M3 | ✅ |
-| XGBoost & Random Forest training for 6-class outcome severity across 4 cohorts + leakage ablation | M4 | ✅ |
-| HANConv GNN training (PyTorch Geometric) for drug-ADR link prediction across all drug classes | M4 | ✅ |
-| FastAPI backend with 10 API routers (auth, demographics, GNN, outcomes, PDF export, reactions, reports, signals, upload, utils) | M5 | ✅ |
-| PostgreSQL schema design with SQLAlchemy 2.0 ORM + Alembic migrations | M2 | ✅ |
-| Co-authored GNN Dashboard research paper (LaTeX) — methodology & results sections | M8 | 🔄 |
-
-#### Amey Deepak Telkar — Frontend, DevOps & Documentation
-
-| Task | Milestone | Status |
-|------|-----------|--------|
-| Problem definition, project scope selection, synopsis registration | M1 | ✅ |
-| 7-page React 18 + Vite + TailwindCSS dashboard (Upload Hub, Demographics, ADR Analysis, Signal Detection, GNN Network, Outcomes, Report Builder) | M5 | ✅ |
-| Report Builder with automated PDF export (jsPDF + html2canvas) | M6 | ✅ |
-| Architecture diagrams — High-Level Architecture, ETL Pipeline, ML & Analytics Components | M7 | ✅ |
-| GitHub repo setup, Docker + docker-compose, authentication & security | M5 | ✅ |
-| README documentation with embedded architecture diagrams and key results | M7 | ✅ |
-| Co-authored GNN Dashboard research paper (LaTeX) — figures, references, abstract | M8 | 🔄 |
-
----
-
-### Week 2 Planned Tasks (Sept 22–28, 2026)
-
-| Task | Milestone | Assignee | Priority |
-|------|-----------|----------|----------|
-| Continue GNN Dashboard research paper — results analysis, discussion, conclusion | M8 | Atherv + Amey | 🔴 High |
-| Set up Jira project, add team members, create Epics & Sprints | M9 | Amey | 🔴 High |
-| Populate Jira board with Week 1 tasks (Done) + Week 2 sprint | M9 | Amey | 🔴 High |
-| Temporal split validation (train 2021–2024, test 2025) for XGBoost | M4 | Atherv | 🟡 Medium |
-| Extend HANConv GNN training to Diabetes All & Diabetes Selected 4 cohorts | M4 | Atherv | 🟡 Medium |
-| Dashboard UI polish — responsive layouts, loading states, error boundaries | M5 | Amey | 🟡 Medium |
-| Add Swagger/OpenAPI descriptions to all FastAPI endpoints | M9 | Atherv | 🟢 Low |
-| Prepare project demo presentation for class | M9 | Amey | 🔴 High |
-
----
-
-## 🏥 Understanding NULL vs. Unknown Ages
-
-A key database constraint prevents the loss of clinical reports that omit patient age:
-
-* **NULL (Empty Field):** Age field in the original report was blank
-* **Unknown (Pipeline Flag):** Set to `True` only if **both** numeric age and `age_grp` are absent. If a report has `age_grp = INF` (Infant) but no numeric age, the pipeline estimates age (e.g., 0.5 years) and maps it to the `INFANT` cohort
-* **Clinical Defense:** Omitting unknown ages would delete over **85%** of raw data. Retaining them preserves critical safety signal sensitivity
-
----
-
-## 🚀 Quick Start
-
-### 1. Run via Docker Compose (Recommended)
-```bash
-docker-compose up --build -d
-```
-
-### 2. Manual Startup (Windows / PowerShell)
-
-#### Backend & Celery (Terminal 1 & 2)
-```powershell
-# Install dependencies
-pip install -r backend/requirements.txt
-
-# Run Backend
-$env:SKIP_RXNORM="1"
-$env:PYTHONIOENCODING="utf-8"
-cd backend
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-```
-```powershell
-# Start Celery Worker (separate terminal)
-cd backend
-celery -A celery_worker worker --loglevel=info
-```
-
-#### Frontend (Terminal 3)
-```powershell
-cd frontend
-npm install
-npm run dev
-```
-
-### 3. Verification Addresses
-* **Dashboard:** [http://localhost:5173](http://localhost:5173)
-* **API Docs (Swagger):** [http://localhost:8000/docs](http://localhost:8000/docs)
-* **Health Check:** [http://localhost:8000/api/health](http://localhost:8000/api/health)
-
----
-
-## 📁 Repository Structure
+## Repository Structure
 
 ```
-faers-pediatric-adr/
-├── backend/                     # FastAPI Application
-│   ├── app/
-│   │   ├── pipeline/            # 13-Step ETL Processing Engine
-│   │   ├── analytics/           # Disproportionality Metrics (PRR, ROR, IC, EBGM)
-│   │   ├── gnn/                 # PyTorch Geometric HANConv GNN
-│   │   ├── models/              # SQLAlchemy ORM Models
-│   │   ├── routers/             # API Endpoints (10 routers)
-│   │   ├── core/                # Core utilities
-│   │   ├── main.py              # FastAPI application entry point
-│   │   ├── database.py          # Database connection & session management
-│   │   └── security.py          # Authentication & authorization
-│   ├── alembic/                 # DB Schema Versioning / Migrations
-│   ├── celery_worker.py         # Background Task Entry Point
-│   ├── stored_proc.sql          # Signal detection stored procedures
-│   └── requirements.txt         # Python dependencies
-├── frontend/                    # React 18 SPA
-│   ├── src/
-│   │   ├── pages/               # 7 Dashboard Pages
-│   │   │   ├── UploadHub.jsx
-│   │   │   ├── Demographics.jsx
-│   │   │   ├── ADRAnalysis.jsx
-│   │   │   ├── SignalDetection.jsx
-│   │   │   ├── GNNNetworkView.jsx
-│   │   │   ├── OutcomesSeverity.jsx
-│   │   │   └── ReportBuilder.jsx
-│   │   ├── components/          # Reusable UI components
-│   │   ├── api/                 # Axios API integration layer
-│   │   ├── store/               # Zustand state management
-│   │   └── security.js          # Frontend security layer
-│   └── vite.config.js           # Vite build configuration
-├── docs/
-│   └── diagrams/                # Architecture & pipeline diagrams
-├── docker-compose.yml           # Multi-container orchestration
-├── Dockerfile                   # Container build instructions
-└── README.md                    # This file
+.
+├── code/                          # Core algorithmic scripts
+│   ├── graph_builder.py           # Heterogeneous drug–ADR–cohort graph construction
+│   ├── model.py                   # PediatricADRHAN (HANConv) model definition
+│   ├── predictor.py               # Candidate drug–ADR link ranking
+│   ├── signal_engine.py           # Four-metric signal flagging
+│   ├── orchestrator.py            # 13-step ingestion pipeline orchestrator
+│   ├── deduplicator.py            # Case deduplication and role-code filtering
+│   ├── validator.py               # FAERS quarterly file validation
+│   ├── verify_signal_flags.py     # Re-checks the S8 Table flags and the 419 graph count
+│   ├── verify_reported_counts.py  # Re-checks manuscript counts against dataset/ and S8 Table
+│   ├── figure_sources/            # LaTeX/TikZ sources for Fig 3 and S1 Fig
+│   ├── requirements.txt
+│   └── README.md                  # Code documentation and reproducibility status
+├── dataset/                       # Database exports used to verify the manuscript
+│   └── README.md                  # What each workbook supports
+├── Submission_Figures/            # Figures as submitted (TIFF / EPS) + PNG previews
+├── Supplementary_Information/     # S1–S8 Tables (Excel) and S1 Fig
+├── CITATION.cff
+├── .zenodo.json                   # Zenodo metadata (authors, licence, keywords)
+├── LICENSE
+└── README.md
 ```
 
 ---
 
-## 📜 License
+## Key Results
 
-Educational & Research Use Only — **PulseTech Team (ANC-031)**.  
-All rights reserved © 2026.
+| Quantity | Value |
+|---|---|
+| FAERS quarters loaded | 20 (2021Q1–2025Q4) |
+| Patient records | 3,420,201 |
+| Records with a resolved pediatric age band | 606,334 (Neonate 23,704 · Infant 29,963 · Child 149,389 · Adolescent 403,278) |
+| Records with unresolved age (kept as an explicit Unknown band) | 2,813,867 (82.27%) |
+| Drug–ADR pairs evaluated, four resolved bands | 6,259 |
+| Flagged signals, four resolved bands | 5,266 |
+| … of which also meet the Evans criteria | 4,689 (89.0%) |
+| Flagged signals, all five bands (dashboard total) | 82,650 |
+| CHILD-band graph | 79 drug nodes, 259 ADR nodes, 500 edges |
+| … signal edges shown in the dashboard (Fig 6) | 419 (83.8%) |
+| MedDRA check | 1,381 of 1,382 adverse-event terms are current MedDRA 28.1 Preferred Terms |
+
+**Important:** most records in the Unknown band are for predominantly adult products, so all-band figures describe the loaded data, not a pediatric population. Only results within the four resolved bands are pediatric findings.
+
+---
+
+## Signal Detection Criteria
+
+A drug–ADR pair is flagged as a signal if **any** of the following is met. This is the rule that reproduces every flag in S8 Table.
+
+| Metric | Criterion |
+|---|---|
+| PRR | PRR ≥ 2 (χ² is computed and reported but not required) |
+| ROR | ROR ≥ 2 and 95% CI lower bound > 1 |
+| IC | IC025 > 0 |
+| EBGM | EB05 > 2 |
+
+This any-method rule is more permissive than the conventional Evans criteria (PRR ≥ 2, χ² ≥ 4, n ≥ 3).
+
+**Two forms of the rule.** `is_signal()` in `code/signal_engine.py` also requires χ² ≥ 4 for the PRR criterion. That stricter form flags the same pairs except the 269 that the stored results flag on the PRR point estimate alone (4,997 instead of 5,266), and applied to the 500 CHILD-band edges it gives the 419 signal edges shown by the dashboard's GNN Network View (Fig 6). The stored rule flags 420; the extra edge is Eligard – Weight increased (n11 = 8, PRR 2.01, χ² 3.05). `code/verify_signal_flags.py` demonstrates both.
+
+---
+
+## Reproducibility
+
+| Component | Status |
+|---|---|
+| Signal-detection results (S8 Table) | Shipped as complete output (6,259 pairs, four resolved bands) |
+| Signal flags, signal counts and the 419 graph count | Re-checked by `code/verify_signal_flags.py` (runs from this archive) |
+| Counts reported in the manuscript | Re-checked by `code/verify_reported_counts.py` against `dataset/` and S8 Table; the script lists the few numbers that rest on the dashboard alone |
+| Graph construction, model definition, link ranking | Code included (`code/`) |
+| Fig 3 and S1 Fig | Regenerable from `code/figure_sources/` (pdflatex) |
+| Figs 1, 2, 4–9 | Dashboard screenshots |
+| PRR / ROR / IC / EBGM computation modules | Not included – output provided in S8 Table |
+| GNN training module and five pipeline steps | Not included – see `code/README.md` |
+| 2×2 contingency cells | Not included in S8 Table |
+
+### Known issues in this version
+
+<!-- Update or remove each item when it is resolved. -->
+
+1. **EBGM values** in S8 Table never exceed 0.992, which is inconsistent with the DuMouchel Multi-item Gamma Poisson Shrinker. They should not be interpreted; no pair reached EB05 > 2, so EBGM contributed no flags, and EBGM is not a model input.
+2. **Training parameters**: manuscript Table 5 and S4 Table both specify 100 epochs, learning rate 0.01, weight decay 1e-4, split 80/10/10, matching `app/gnn/trainer.py`.
+
+## Running the checks
+
+Python 3.9+ with `pandas` and `openpyxl`:
+
+```
+pip install pandas openpyxl
+python code/verify_signal_flags.py
+python code/verify_reported_counts.py
+```
+
+Each script prints PASS or FAIL for every number it checks and exits with status 0 only if all pass.
+
+---
+
+## Data Availability
+
+- **FAERS data:** publicly available from the [U.S. FDA](https://fis.fda.gov/extensions/FPD-QDE-FAERS/FPD-QDE-FAERS.html)
+- **Signal-detection output:** complete results in `Supplementary_Information/S8_Table_Complete_Signal_Detection.xlsx`
+- **Verification exports:** `dataset/`
+- **MedDRA:** licensed from the MSSO; no MedDRA dictionary files are redistributed
+
+---
+
+## Citation
+
+> Telkar A, Telkar A, Javalgikar A, Ruikar D, Madanwale N. PulseTech: Design and implementation of a human-in-the-loop web dashboard for pediatric FAERS pharmacovigilance with heterogeneous graph neural network signal exploration. *PLOS ONE* (submitted).
+
+**Zenodo DOI:** [ZENODO_CONCEPT_DOI](https://doi.org/ZENODO_CONCEPT_DOI)
+
+---
+
+## License
+
+Creative Commons Attribution 4.0 International (CC BY 4.0). See `LICENSE`.

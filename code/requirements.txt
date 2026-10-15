@@ -1,0 +1,9 @@
+# Python 3.11+ ; PostgreSQL 15+ for the full backend (not included)
+# Versions used in the study were not recorded; pin exact versions before the release.
+torch>=2.0
+torch_geometric
+sqlalchemy
+pandas
+numpy
+scipy       # for EBGM posterior mixture (scipy.stats.gamma, scipy.special.gammaln)
+openpyxl    # only for verify_signal_flags.py / verify_reported_counts.py (with pandas)

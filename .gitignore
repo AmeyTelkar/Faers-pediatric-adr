@@ -1,67 +1,19 @@
-# ========================
-# FAERS Pediatric ADR - .gitignore
-# ========================
-
-# ----- Raw FAERS Data Files (too large for GitHub) -----
-data/
-
-# ----- Python -----
-__pycache__/
-*.py[cod]
-*$py.class
-*.egg-info/
-*.egg
-dist/
-build/
-.eggs/
-*.so
-venv/
-env/
-.venv/
-
-# ----- Node / Frontend -----
-node_modules/
-frontend/dist/
-frontend/build/
-.npm
-.eslintcache
-
-# ----- Environment / Secrets -----
-.env
-*.env.local
-*.env.production
-
-# ----- Cache Files -----
-backend/reaction_cache_data/
-backend/report_cache_data/
-backend/gnn/
-
-# ----- IDE -----
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# ----- OS Files -----
-.DS_Store
-Thumbs.db
-desktop.ini
-
-# ----- Test / Generated Files -----
-backend/test.pdf
-backend/test_6500.pdf
-backend/parsed_results.txt
-
-# ----- Misc -----
+# Manuscript and cover letter (confidential - not for GitHub until publication)
+*.tex
+!code/figure_sources/*.tex
+*.aux
 *.log
-*.pid
-*.seed
+*.out
+*.docx
+!Supplementary_Information/*.docx
+*Cover_Letter*
+*Manuscript*
+PulseTech_PLOSONE_*.pdf
 
-# ----- Presentation & Q&A Files -----
-Data_Scalability_Answers.md
-Pipeline_Adaptability.md
-Presentation_Answers.md
-Presentation_DeepDive_Answers.md
-Presentation_ML_Explanation.md
+# Licensed terminology - never publish
+MedDRA*/
+*.asc
 
+# Python
+__pycache__/
+*.pyc
